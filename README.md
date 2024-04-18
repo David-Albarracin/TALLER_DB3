@@ -1,4 +1,4 @@
-
+![HMTL](https://raw.githubusercontent.com/David-Albarracin/README_MATERIALS/main/sql.png)
 
 # Taller SQL # 3
 
@@ -158,7 +158,7 @@ CREATE TABLE garden.detail_order (
 )
 ```
 
-## 
+## NUEVAS TABLAS
 
 ```sql
 -- TABLA OFICINA
