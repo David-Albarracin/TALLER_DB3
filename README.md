@@ -16,8 +16,6 @@ USE garden;
 ```
 
 ```sql
--- TIPO DE DIRECCION
-
 /*
 * Esta Tabla se Crea para Normalizar la Tabla Direccion
 * 
@@ -39,7 +37,7 @@ CREATE TABLE `country` (
   `country_prefix` varchar(45) NOT NULL,
   `country_name` varchar(45) NOT NULL,
   `flag_url` varchar(45) DEFAULT NULL,
-  CONSTRAINT country_pk PRIMARY KEY (`country_id`),
+  PRIMARY KEY (`country_id`),
   UNIQUE KEY `country_unique` (`country_prefix`)
 );
 
@@ -51,7 +49,7 @@ CREATE TABLE `gama_product` (
   `description_text` text,
   `description_html` text,
   `imagen_url` varchar(250) DEFAULT NULL,
-  CONSTRAINT gama_product_pk PRIMARY KEY (`gama_product_id`)
+  PRIMARY KEY (`gama_product_id`)
 );
 
 
@@ -65,7 +63,7 @@ CREATE TABLE `gama_product` (
 CREATE TABLE `legal_type` (
   `legal_type_id` int NOT NULL,
   `type` varchar(45) DEFAULT NULL,
-  CONSTRAINT legal_type_pk PRIMARY KEY (`legal_type_id`)
+  PRIMARY KEY (`legal_type_id`)
 );
 
 
@@ -80,7 +78,7 @@ CREATE TABLE `measurement` (
   `width` varchar(45) DEFAULT NULL,
   `Length` varchar(45) DEFAULT NULL,
   `weight` varchar(45) DEFAULT NULL,
-   CONSTRAINT measurement_pk PRIMARY KEY (`measurement_id`)
+  PRIMARY KEY (`measurement_id`)
 );
 
 
@@ -92,7 +90,7 @@ CREATE TABLE `measurement` (
 CREATE TABLE `order_type` (
   `order_type_id` int NOT NULL,
   `type_name` varchar(45) DEFAULT NULL,
-  CONSTRAINT order_type_pk PRIMARY KEY (`order_type_id`)
+  PRIMARY KEY (`order_type_id`)
 );
 
 
@@ -104,7 +102,7 @@ CREATE TABLE `order_type` (
 CREATE TABLE `pay_method` (
   `pay_method_id` int NOT NULL,
   `method` varchar(45) DEFAULT NULL,
-  CONSTRAINT pay_method_pk PRIMARY KEY (`pay_method_id`)
+  PRIMARY KEY (`pay_method_id`)
 );
 
 
@@ -115,7 +113,7 @@ CREATE TABLE `pay_method` (
 CREATE TABLE `rol` (
   `rol_id` int NOT NULL,
   `rol_name` varchar(45) DEFAULT NULL,
-  CONSTRAINT rol_pk PRIMARY KEY (`rol_id`)
+  PRIMARY KEY (`rol_id`)
 );
 
 
@@ -130,9 +128,9 @@ CREATE TABLE `status` (
 );
 
 
--- PRODUCTO PRECIO
+-- PRODUCTO
 /*
-* 
+* Se normaliza los tados de dimensiones y gama
 */
 
 CREATE TABLE `product` (
@@ -146,9 +144,7 @@ CREATE TABLE `product` (
   `gama_product_id` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`product_id`),
   KEY `fk_product_measurement1_idx` (`measurement_id`),
-  KEY `product_gama_product_FK` (`gama_product_id`),
-  CONSTRAINT `fk_product_measurement1` FOREIGN KEY (`measurement_id`) REFERENCES `measurement` (`measurement_id`),
-  CONSTRAINT `product_gama_product_FK` FOREIGN KEY (`gama_product_id`) REFERENCES `gama_product` (`gama_product_id`)
+  KEY `product_gama_product_FK` (`gama_product_id`)
 );
 
 
@@ -159,8 +155,7 @@ CREATE TABLE `region` (
   `region_name` varchar(45) DEFAULT NULL,
   `country_id` int NOT NULL,
   PRIMARY KEY (`region_id`),
-  KEY `fk_region_country1_idx` (`country_id`),
-  CONSTRAINT `fk_region_country1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`)
+  KEY `fk_region_country1_idx` (`country_id`)
 );
 
 
@@ -176,8 +171,7 @@ CREATE TABLE `user_meta` (
   `legal_id` varchar(45) DEFAULT NULL,
   `legal_type_id` int NOT NULL,
   PRIMARY KEY (`usermeta_id`),
-  KEY `fk_user_meta_legal_type1_idx` (`legal_type_id`),
-  CONSTRAINT `fk_user_meta_legal_type1` FOREIGN KEY (`legal_type_id`) REFERENCES `legal_type` (`legal_type_id`)
+  KEY `fk_user_meta_legal_type1_idx` (`legal_type_id`)
 );
 
 
@@ -189,8 +183,7 @@ CREATE TABLE `city` (
   `postal_code` varchar(45) DEFAULT NULL,
   `region_id` int NOT NULL,
   PRIMARY KEY (`city_id`),
-  KEY `fk_city_region1_idx` (`region_id`),
-  CONSTRAINT `fk_city_region1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`)
+  KEY `fk_city_region1_idx` (`region_id`)
 );
 
 
@@ -204,16 +197,14 @@ CREATE TABLE `address` (
   `address_id` int NOT NULL,
   `address_line_1` varchar(45) DEFAULT NULL,
   `address_line_2` varchar(45) DEFAULT NULL,
-  `user_id` int NOT NULL,
-  `city_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `city_id` int DEFAULT NULL,
+  `office_id` int NULL,
   `adreess_type_id` int NOT NULL,
   PRIMARY KEY (`address_id`),
   KEY `fk_adreess_user1_idx` (`user_id`),
   KEY `fk_adreess_city1_idx` (`city_id`),
-  KEY `fk_adreess_adreess_type1_idx` (`adreess_type_id`),
-  CONSTRAINT `fk_adreess_adreess_type1` FOREIGN KEY (`adreess_type_id`) REFERENCES `address_type` (`address_type_id`),
-  CONSTRAINT `fk_adreess_city1` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`),
-  CONSTRAINT `fk_adreess_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+  KEY `fk_adreess_adreess_type1_idx` (`adreess_type_id`)
 );
 
 
@@ -224,11 +215,9 @@ CREATE TABLE `address` (
 */
 CREATE TABLE `office` (
   `office_id` int NOT NULL,
-  `address_id` int NOT NULL,
   `office_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`office_id`),
-  KEY `fk_office_adreess1_idx` (`address_id`),
-  CONSTRAINT `fk_office_adreess1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`)
+  KEY `fk_office_adreess1_idx` (`address_id`)
 );
 
 
@@ -250,10 +239,7 @@ CREATE TABLE `order` (
   PRIMARY KEY (`order_id`),
   KEY `fk_order_user1_idx` (`user_id`),
   KEY `fk_order_status1_idx` (`status_id`),
-  KEY `fk_order_order_type1_idx` (`order_type_id`),
-  CONSTRAINT `fk_order_order_type1` FOREIGN KEY (`order_type_id`) REFERENCES `order_type` (`order_type_id`),
-  CONSTRAINT `fk_order_status1` FOREIGN KEY (`status_id`) REFERENCES `status` (`status_id`),
-  CONSTRAINT `fk_order_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+  KEY `fk_order_order_type1_idx` (`order_type_id`)
 );
 
 
@@ -269,9 +255,7 @@ CREATE TABLE `order_detail` (
   `unit_price` varchar(45) DEFAULT NULL,
   `line_number` smallint DEFAULT NULL,
   KEY `fk_detail_order_product1_idx` (`product_id`),
-  KEY `fk_detail_order_order1_idx` (`order_id`),
-  CONSTRAINT `fk_detail_order_order1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
-  CONSTRAINT `fk_detail_order_product1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`)
+  KEY `fk_detail_order_order1_idx` (`order_id`)
 );
 
 
@@ -289,10 +273,8 @@ CREATE TABLE `pay` (
   `pay_method_id` int NOT NULL,
   PRIMARY KEY (`id_transaction`),
   KEY `fk_pay_user1_idx` (`user_id`),
-  KEY `fk_pay_pay_method1_idx` (`pay_method_id`),
-  CONSTRAINT `fk_pay_pay_method1` FOREIGN KEY (`pay_method_id`) REFERENCES `pay_method` (`pay_method_id`),
-  CONSTRAINT `fk_pay_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `fk_pay_pay_method1_idx` (`pay_method_id`)
+);
 
 
 -- NUMEROS DE TELEFONOS
@@ -303,7 +285,7 @@ CREATE TABLE `pay` (
 
 CREATE TABLE `phone_number` (
   `phone_number_id` int NOT NULL,
-  `phone_number` varchar(45) DEFAULT NULL,
+  `phone_number` varchar(45) NOT NULL,
   `phone_prefix` varchar(45) DEFAULT NULL,
   `description` varchar(45) DEFAULT NULL,
   `user_id` int DEFAULT NULL,
@@ -312,10 +294,7 @@ CREATE TABLE `phone_number` (
   PRIMARY KEY (`phone_number_id`),
   KEY `fk_phone_number_user1_idx` (`user_id`),
   KEY `fk_phone_number_office1_idx` (`office_id`),
-  KEY `phone_number_country_FK` (`phone_prefix`),
-  CONSTRAINT `fk_phone_number_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
-  CONSTRAINT `fk_phone_number_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
-  CONSTRAINT `phone_number_country_FK` FOREIGN KEY (`phone_prefix`) REFERENCES `country` (`country_prefix`)
+  KEY `phone_number_country_FK` (`phone_prefix`)
 );
 
 
@@ -329,24 +308,185 @@ CREATE TABLE `user` (
   `user_id` int NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `usermeta_id` int NOT NULL,
-  `office_id` int NOT NULL,
+  `usermeta_id` int DEFAULT NULL,
+  `office_id` int DEFAULT NULL,
   `rol_id` int NOT NULL,
-  `employee_id` int NOT NULL,
+  `employee_id` int NULL,
   `loan_limit` decimal(15,0) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   KEY `fk_user_user_meta1_idx` (`usermeta_id`),
   KEY `fk_user_office1_idx` (`office_id`),
   KEY `fk_user_rol1_idx` (`rol_id`),
-  KEY `fk_user_user1_idx` (`employee_id`),
-  CONSTRAINT `fk_user_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
-  CONSTRAINT `fk_user_rol1` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`rol_id`),
-  CONSTRAINT `fk_user_user1` FOREIGN KEY (`employee_id`) REFERENCES `user` (`user_id`),
-  CONSTRAINT `fk_user_user_meta1` FOREIGN KEY (`usermeta_id`) REFERENCES `user_meta` (`usermeta_id`)
+  KEY `fk_user_user1_idx` (`employee_id`)
 );
+
+-- Constraints para la tabla `address`
+ALTER TABLE `address`
+ADD CONSTRAINT `fk_adreess_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+ADD CONSTRAINT `fk_adreess_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
+ADD CONSTRAINT `fk_adreess_city1` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`),
+ADD CONSTRAINT `fk_adreess_adreess_type1` FOREIGN KEY (`adreess_type_id`) REFERENCES `address_type` (`address_type_id`);
+
+
+-- Constraints para la tabla `order`
+ALTER TABLE `order`
+ADD CONSTRAINT `fk_order_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+ADD CONSTRAINT `fk_order_status1` FOREIGN KEY (`status_id`) REFERENCES `status` (`status_id`),
+ADD CONSTRAINT `fk_order_order_type1` FOREIGN KEY (`order_type_id`) REFERENCES `order_type` (`order_type_id`);
+
+-- Constraints para la tabla `order_detail`
+ALTER TABLE `order_detail`
+ADD CONSTRAINT `fk_detail_order_order1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
+ADD CONSTRAINT `fk_detail_order_product1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
+
+-- Constraints para la tabla `pay`
+ALTER TABLE `pay`
+ADD CONSTRAINT `fk_pay_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+ADD CONSTRAINT `fk_pay_pay_method1` FOREIGN KEY (`pay_method_id`) REFERENCES `pay_method` (`pay_method_id`);
+
+-- Constraints para la tabla `phone_number`
+ALTER TABLE `phone_number`
+ADD CONSTRAINT `fk_phone_number_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
+ADD CONSTRAINT `fk_phone_number_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+ADD CONSTRAINT `phone_number_country_FK` FOREIGN KEY (`phone_prefix`) REFERENCES `country` (`country_prefix`);
+
+-- Constraints para la tabla `user`
+ALTER TABLE `user`
+ADD CONSTRAINT `fk_user_user_meta1` FOREIGN KEY (`usermeta_id`) REFERENCES `user_meta` (`usermeta_id`),
+ADD CONSTRAINT `fk_user_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
+ADD CONSTRAINT `fk_user_rol1` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`rol_id`),
+ADD CONSTRAINT `fk_user_user1` FOREIGN KEY (`employee_id`) REFERENCES `user` (`user_id`);
+
 ```
 
 
+
+## INSERTAR DATOS DE PRUEBA
+
+```sql
+-- Insertando datos de prueba en la tabla `address_type`
+INSERT INTO `address_type` (`address_type_id`, `address_type`)
+VALUES 
+(1, 'Envío'),
+(2, 'Facturación');
+
+-- Insertando datos de prueba en la tabla `country`
+INSERT INTO `country` (`country_id`, `country_prefix`, `country_name`, `flag_url`)
+VALUES 
+(1, '+34', 'Spain', 'https://example.com/flag_spain.png');
+
+-- Insertando datos de prueba en la tabla `gama_product`
+INSERT INTO `gama_product` (`gama_product_id`, `description_text`, `description_html`, `imagen_url`)
+VALUES 
+('gama1', 'Descripción de la Gama 1', '<p>Descripción de la Gama 1</p>', 'https://example.com/gama1.png'),
+('gama2', 'Descripción de la Gama 2', '<p>Descripción de la Gama 2</p>', 'https://example.com/gama2.png');
+
+-- Insertando datos de prueba en la tabla `legal_type`
+INSERT INTO `legal_type` (`legal_type_id`, `type`)
+VALUES 
+(1, 'CC'),
+(2, 'NIT'),
+(3, 'TI');
+
+-- Insertando datos de prueba en la tabla `measurement`
+INSERT INTO `measurement` (`measurement_id`, `height`, `width`, `Length`, `weight`)
+VALUES 
+(1, '10 cm', '5 cm', '20 cm', '500 g'),
+(2, '15 cm', '8 cm', '25 cm', '750 g');
+
+-- Insertando datos de prueba en la tabla `order_type`
+INSERT INTO `order_type` (`order_type_id`, `type_name`)
+VALUES 
+(1, 'Compra'),
+(2, 'Venta');
+
+-- Insertando datos de prueba en la tabla `pay_method`
+INSERT INTO `pay_method` (`pay_method_id`, `method`)
+VALUES 
+(1, 'Efectivo'),
+(2, 'Tarjeta de crédito'),
+(3, 'Transferencia bancaria');
+
+-- Insertando datos de prueba en la tabla `rol`
+INSERT INTO `rol` (`rol_id`, `rol_name`)
+VALUES 
+(1, 'Empleado'),
+(2, 'Cliente'),
+(3, 'Proveedor');
+
+-- Insertando datos de prueba en la tabla `status`
+INSERT INTO `status` (`status_id`, `status_name`)
+VALUES 
+(1, 'Pendiente'),
+(2, 'En proceso'),
+(3, 'Entregado');
+
+-- Insertando datos de prueba en la tabla `region`
+INSERT INTO `region` (`region_id`, `region_name`, `country_id`)
+VALUES 
+(1, 'Madrid', 1),
+(2, 'Barcelona', 1);
+
+-- Insertando datos de prueba en la tabla `city`
+INSERT INTO `city` (`city_id`, `city_name`, `postal_code`, `region_id`)
+VALUES 
+(1, 'Madrid', '28001', 1),
+(2, 'Barcelona', '08001', 2);
+
+-- Insertando datos de prueba en la tabla `user_meta`
+INSERT INTO `user_meta` (`usermeta_id`, `first_name`, `last_names`, `first_surname`, `last_surname`, `email`, `legal_id`, `legal_type_id`)
+VALUES 
+(1, 'Juan', 'García Pérez', 'García', 'Pérez', 'juan@example.com', '123456789', 1),
+(2, 'María', 'López García', 'López', 'García', 'maria@example.com', '987654321', 2);
+
+-- Insertando datos de prueba en la tabla `product`
+INSERT INTO `product` (`product_id`, `product_name`, `description`, `stock_amount`, `price`, `price_provider`, `measurement_id`, `gama_product_id`)
+VALUES 
+(1, 'Rosa roja', 'Descripción de la rosa roja', 100, 10, 8, 1, 'gama1'),
+(2, 'Tulipán blanco', 'Descripción del tulipán blanco', 50, 8, 6, 2, 'gama2');
+
+-- Insertando datos de prueba en la tabla `office`
+INSERT INTO `office` (`office_id`, `office_name`)
+VALUES 
+(1, 'Oficina Central'),
+(2, 'Oficina de Ventas');
+
+-- Insertando datos de prueba en la tabla `user`
+INSERT INTO `user` (`user_id`, `created_at`, `updated_at`, `usermeta_id`, `office_id`, `rol_id`, `employee_id`, `loan_limit`)
+VALUES 
+(1, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 1, 1, NULL, 1000),
+(2, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 2, 2, 2, NULL, NULL);
+
+-- Insertando datos de prueba en la tabla `order`
+INSERT INTO `order` (`order_id`, `user_id`, `order_date`, `waiting_date`, `deliver_date`, `comments`, `status_id`, `order_type_id`)
+VALUES 
+(1, 1, '2024-04-19', NULL, NULL, 'Pedido de prueba', 1, 1),
+(2, 2, '2024-04-18', NULL, NULL, 'Otro pedido de prueba', 1, 2);
+
+-- Insertando datos de prueba en la tabla `order_detail`
+INSERT INTO `order_detail` (`product_id`, `order_id`, `amount`, `unit_price`, `line_number`)
+VALUES 
+(1, 1, '1', '10', 1),
+(2, 2, '2', '8', 1);
+
+-- Insertando datos de prueba en la tabla `pay`
+INSERT INTO `pay` (`id_transaction`, `pay_date`, `total`, `user_id`, `pay_method_id`)
+VALUES 
+('TXN001', '2024-04-19 12:00:00', 10, 1, 1),
+('TXN002', '2024-04-18 12:00:00', 16, 2, 2);
+
+-- Insertando datos de prueba en la tabla `phone_number`
+INSERT INTO `phone_number` (`phone_number_id`, `phone_number`, `phone_prefix`, `description`, `user_id`, `office_id`, `phone_extension`)
+VALUES 
+(1, '123456789', '+34', 'Personal', 1, NULL, NULL),
+(2, '987654321', '+34', 'Trabajo', 2, 2, NULL);
+
+-- Insertando datos de prueba en la tabla `address`
+INSERT INTO `address` (`address_id`, `address_line_1`, `address_line_2`, `user_id`, `city_id`, `adreess_type_id`)
+VALUES 
+(1, 'Calle Principal 123', 'Piso 2, Puerta B', 1, 1, 1),
+(2, 'Avenida Secundaria 456', NULL, 2, 2, 2);
+```
 
 
 
