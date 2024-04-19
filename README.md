@@ -16,165 +16,334 @@ USE garden;
 ```
 
 ```sql
--- TABLA PRODUCTO
+-- TIPO DE DIRECCION
+
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Esta Tabla se Crea para Normalizar la Tabla Direccion
+* 
 */
-CREATE TABLE garden.product (
-	`code_product` INT AUTO_INCREMENT NOT NULL,
-	`name_product` VARCHAR(100) NULL,
-	`gama_id` VARCHAR(50) NULL,
-	`dimensions` VARCHAR(25) NULL,
-	`provider` VARCHAR(100) NULL,
-	`description` TEXT NULL,
-	`stock_amount` SMALLINT NOT NULL,
-	`price_sell` DECIMAL(15.2) NOT NULL,
-	`price_provider` DECIMAL(15.2) NULL,
-	CONSTRAINT product_pk PRIMARY KEY (code_product),
-    CONSTRAINT gama_fk FOREIGN KEY (gama_id) REFERENCES gama_product(gama_id)
+CREATE TABLE `address_type` (
+  `address_type_id` int NOT NULL,
+  `address_type` varchar(45) NOT NULL,
+  PRIMARY KEY (`address_type_id`)
 );
-```
 
-```sql
--- TABLA GAMA PRODUCTO
+-- PAIS
+/*
+* Esta Tabla se Crea para Normalizar la Tabla Direccion
+* Se usa para tener mejor control de los paises 
+*/
+
+CREATE TABLE `country` (
+  `country_id` int NOT NULL,
+  `country_prefix` varchar(45) NOT NULL,
+  `country_name` varchar(45) NOT NULL,
+  `flag_url` varchar(45) DEFAULT NULL,
+  CONSTRAINT country_pk PRIMARY KEY (`country_id`),
+  UNIQUE KEY `country_unique` (`country_prefix`)
+);
+
+
+-- GAMA DEL PRODUCTO 
+
+CREATE TABLE `gama_product` (
+  `gama_product_id` varchar(50) NOT NULL,
+  `description_text` text,
+  `description_html` text,
+  `imagen_url` varchar(250) DEFAULT NULL,
+  CONSTRAINT gama_product_pk PRIMARY KEY (`gama_product_id`)
+);
+
+
+-- TIPO DE LEGAL CC, NIT, TI
 
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se usa Para Normalizar el tipo de legal id
+* Si es Cedula o nit
 */
-CREATE TABLE garden.gama_product (
-	`gama_id` VARCHAR(50) NOT NULL,
-	`description_txt` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen` VARCHAR(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
 
-```sql
--- TABLA DETALLE PEDIDO
+CREATE TABLE `legal_type` (
+  `legal_type_id` int NOT NULL,
+  `type` varchar(45) DEFAULT NULL,
+  CONSTRAINT legal_type_pk PRIMARY KEY (`legal_type_id`)
+);
+
+
+-- TABLA PARA LAS MEDIDAS DEL PRODUCTO
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se Normaliza dimensiones la instancia multibalorada a la tabla de las medidas del producto
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
 
-```sql
--- TABLA PEDIDO
+CREATE TABLE `measurement` (
+  `measurement_id` int NOT NULL,
+  `height` varchar(45) DEFAULT NULL,
+  `width` varchar(45) DEFAULT NULL,
+  `Length` varchar(45) DEFAULT NULL,
+  `weight` varchar(45) DEFAULT NULL,
+   CONSTRAINT measurement_pk PRIMARY KEY (`measurement_id`)
+);
+
+
+-- TIPO DE ORDEN COMPRA, VENTA
+
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se Normaliza el tipo de orden para saver si es compra o venta
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
+CREATE TABLE `order_type` (
+  `order_type_id` int NOT NULL,
+  `type_name` varchar(45) DEFAULT NULL,
+  CONSTRAINT order_type_pk PRIMARY KEY (`order_type_id`)
+);
 
-```sql
--- TABLA CLIENTE
+
+-- METODO DE PAGO (EFECTIVO, TARGETA ...)
+
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se Normaliza el tipo de metodo de pago
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
+CREATE TABLE `pay_method` (
+  `pay_method_id` int NOT NULL,
+  `method` varchar(45) DEFAULT NULL,
+  CONSTRAINT pay_method_pk PRIMARY KEY (`pay_method_id`)
+);
 
-```sql
--- TABLA PAGO
+
+-- ROLES (empleado, cliente, proveedor)
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se Crea para normalizar la tabla cliente - proveedor -empleado
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
+CREATE TABLE `rol` (
+  `rol_id` int NOT NULL,
+  `rol_name` varchar(45) DEFAULT NULL,
+  CONSTRAINT rol_pk PRIMARY KEY (`rol_id`)
+);
 
-```sql
--- TABLA EMPLEADO
+
+-- ESTADO DEL PEDIDO (PEDIENTE, ...)
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se Normaliza el campo estado del producto
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
+CREATE TABLE `status` (
+  `status_id` int NOT NULL,
+  `status_name` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`status_id`)
+);
 
-```sql
--- TABLA OFICINA
+
+-- PRODUCTO PRECIO
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* 
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
-```
 
-## NUEVAS TABLAS
+CREATE TABLE `product` (
+  `product_id` int NOT NULL,
+  `product_name` varchar(70) DEFAULT NULL,
+  `description` text,
+  `stock_amount` smallint DEFAULT NULL,
+  `price` decimal(10,0) NOT NULL,
+  `price_provider` decimal(10,0) NOT NULL,
+  `measurement_id` int NOT NULL,
+  `gama_product_id` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`product_id`),
+  KEY `fk_product_measurement1_idx` (`measurement_id`),
+  KEY `product_gama_product_FK` (`gama_product_id`),
+  CONSTRAINT `fk_product_measurement1` FOREIGN KEY (`measurement_id`) REFERENCES `measurement` (`measurement_id`),
+  CONSTRAINT `product_gama_product_FK` FOREIGN KEY (`gama_product_id`) REFERENCES `gama_product` (`gama_product_id`)
+);
 
-```sql
--- TABLA OFICINA
+
+-- REGION
+
+CREATE TABLE `region` (
+  `region_id` int NOT NULL,
+  `region_name` varchar(45) DEFAULT NULL,
+  `country_id` int NOT NULL,
+  PRIMARY KEY (`region_id`),
+  KEY `fk_region_country1_idx` (`country_id`),
+  CONSTRAINT `fk_region_country1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`)
+);
+
+
+-- INFORMACION DEL USUARIO
+
+CREATE TABLE `user_meta` (
+  `usermeta_id` int NOT NULL,
+  `first_name` varchar(45) DEFAULT NULL,
+  `last_names` varchar(250) DEFAULT NULL,
+  `first_surname` varchar(45) DEFAULT NULL,
+  `last_surname` varchar(45) DEFAULT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  `legal_id` varchar(45) DEFAULT NULL,
+  `legal_type_id` int NOT NULL,
+  PRIMARY KEY (`usermeta_id`),
+  KEY `fk_user_meta_legal_type1_idx` (`legal_type_id`),
+  CONSTRAINT `fk_user_meta_legal_type1` FOREIGN KEY (`legal_type_id`) REFERENCES `legal_type` (`legal_type_id`)
+);
+
+
+-- CIUDAD
+
+CREATE TABLE `city` (
+  `city_id` int NOT NULL,
+  `city_name` varchar(45) DEFAULT NULL,
+  `postal_code` varchar(45) DEFAULT NULL,
+  `region_id` int NOT NULL,
+  PRIMARY KEY (`city_id`),
+  KEY `fk_city_region1_idx` (`region_id`),
+  CONSTRAINT `fk_city_region1` FOREIGN KEY (`region_id`) REFERENCES `region` (`region_id`)
+);
+
+
+-- DIRECCION
 /*
-* Normalizacion Nª1 (INTEGRIDAD)
-* Normalizacion Nª2 (DUPLICIDAD)
-* Normalizacion Nª3 (DEPENDENCIAS)
-* Normalizacion Nª4 (MULTI DEPENDENCIAS)
+* Se normaliza la cciudad y el tipo de direccion
+* Envio o Facturacion
 */
-CREATE TABLE garden.detail_order (
-	`code_order` VARCHAR(50) NOT NULL,
-	`code_product` TEXT NULL,
-	`description_html` TEXT NULL,
-	`imagen varchar`(250) NULL,
-	CONSTRAINT gama_product_pk PRIMARY KEY (gama_id)
-)
+
+CREATE TABLE `address` (
+  `address_id` int NOT NULL,
+  `address_line_1` varchar(45) DEFAULT NULL,
+  `address_line_2` varchar(45) DEFAULT NULL,
+  `user_id` int NOT NULL,
+  `city_id` int NOT NULL,
+  `adreess_type_id` int NOT NULL,
+  PRIMARY KEY (`address_id`),
+  KEY `fk_adreess_user1_idx` (`user_id`),
+  KEY `fk_adreess_city1_idx` (`city_id`),
+  KEY `fk_adreess_adreess_type1_idx` (`adreess_type_id`),
+  CONSTRAINT `fk_adreess_adreess_type1` FOREIGN KEY (`adreess_type_id`) REFERENCES `address_type` (`address_type_id`),
+  CONSTRAINT `fk_adreess_city1` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`),
+  CONSTRAINT `fk_adreess_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+);
+
+
+-- OFFICINAS
+/*
+* Se normaliza los datos de direccion 
+* los datos de telefono
+*/
+CREATE TABLE `office` (
+  `office_id` int NOT NULL,
+  `address_id` int NOT NULL,
+  `office_name` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`office_id`),
+  KEY `fk_office_adreess1_idx` (`address_id`),
+  CONSTRAINT `fk_office_adreess1` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`)
+);
+
+
+-- ORDEN
+/*
+* Se normaliza el estado de la orden
+* Se normaliza los detalles de la orden
+*/
+
+CREATE TABLE `order` (
+  `order_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `order_date` date DEFAULT NULL,
+  `waiting_date` date DEFAULT NULL,
+  `deliver_date` date DEFAULT NULL,
+  `comments` varchar(45) DEFAULT NULL,
+  `status_id` int NOT NULL,
+  `order_type_id` int NOT NULL,
+  PRIMARY KEY (`order_id`),
+  KEY `fk_order_user1_idx` (`user_id`),
+  KEY `fk_order_status1_idx` (`status_id`),
+  KEY `fk_order_order_type1_idx` (`order_type_id`),
+  CONSTRAINT `fk_order_order_type1` FOREIGN KEY (`order_type_id`) REFERENCES `order_type` (`order_type_id`),
+  CONSTRAINT `fk_order_status1` FOREIGN KEY (`status_id`) REFERENCES `status` (`status_id`),
+  CONSTRAINT `fk_order_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+);
+
+
+-- ORDEN DETALLES
+/*
+* Se normaliza los detalles de la orden
+*/
+
+CREATE TABLE `order_detail` (
+  `product_id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `amount` varchar(45) DEFAULT NULL,
+  `unit_price` varchar(45) DEFAULT NULL,
+  `line_number` smallint DEFAULT NULL,
+  KEY `fk_detail_order_product1_idx` (`product_id`),
+  KEY `fk_detail_order_order1_idx` (`order_id`),
+  CONSTRAINT `fk_detail_order_order1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`),
+  CONSTRAINT `fk_detail_order_product1` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`)
+);
+
+
+-- PAGOS
+/*
+* Se normaliza los metodos de pago que podria usar el cliente
+*
+*/
+
+CREATE TABLE `pay` (
+  `id_transaction` varchar(250) NOT NULL,
+  `pay_date` datetime DEFAULT NULL,
+  `total` decimal(15,0) DEFAULT NULL,
+  `user_id` int NOT NULL,
+  `pay_method_id` int NOT NULL,
+  PRIMARY KEY (`id_transaction`),
+  KEY `fk_pay_user1_idx` (`user_id`),
+  KEY `fk_pay_pay_method1_idx` (`pay_method_id`),
+  CONSTRAINT `fk_pay_pay_method1` FOREIGN KEY (`pay_method_id`) REFERENCES `pay_method` (`pay_method_id`),
+  CONSTRAINT `fk_pay_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- NUMEROS DE TELEFONOS
+/*
+* Esta Tabla nos ayuda a normalizar la duplicidad
+*
+*/
+
+CREATE TABLE `phone_number` (
+  `phone_number_id` int NOT NULL,
+  `phone_number` varchar(45) DEFAULT NULL,
+  `phone_prefix` varchar(45) DEFAULT NULL,
+  `description` varchar(45) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `office_id` int DEFAULT NULL,
+  `phone_extension` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`phone_number_id`),
+  KEY `fk_phone_number_user1_idx` (`user_id`),
+  KEY `fk_phone_number_office1_idx` (`office_id`),
+  KEY `phone_number_country_FK` (`phone_prefix`),
+  CONSTRAINT `fk_phone_number_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
+  CONSTRAINT `fk_phone_number_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `phone_number_country_FK` FOREIGN KEY (`phone_prefix`) REFERENCES `country` (`country_prefix`)
+);
+
+
+-- USUARIOS
+/*
+* Esta Tabla nos ayuda a normalizar la duplicidad
+*
+*/
+
+CREATE TABLE `user` (
+  `user_id` int NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `usermeta_id` int NOT NULL,
+  `office_id` int NOT NULL,
+  `rol_id` int NOT NULL,
+  `employee_id` int NOT NULL,
+  `loan_limit` decimal(15,0) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `fk_user_user_meta1_idx` (`usermeta_id`),
+  KEY `fk_user_office1_idx` (`office_id`),
+  KEY `fk_user_rol1_idx` (`rol_id`),
+  KEY `fk_user_user1_idx` (`employee_id`),
+  CONSTRAINT `fk_user_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
+  CONSTRAINT `fk_user_rol1` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`rol_id`),
+  CONSTRAINT `fk_user_user1` FOREIGN KEY (`employee_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `fk_user_user_meta1` FOREIGN KEY (`usermeta_id`) REFERENCES `user_meta` (`usermeta_id`)
+);
 ```
 
 
