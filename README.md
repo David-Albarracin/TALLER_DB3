@@ -216,8 +216,7 @@ CREATE TABLE `address` (
 CREATE TABLE `office` (
   `office_id` int NOT NULL,
   `office_name` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`office_id`),
-  KEY `fk_office_adreess1_idx` (`address_id`)
+  PRIMARY KEY (`office_id`)
 );
 
 
@@ -482,10 +481,10 @@ VALUES
 (2, '987654321', '+34', 'Trabajo', 2, 2, NULL);
 
 -- Insertando datos de prueba en la tabla `address`
-INSERT INTO `address` (`address_id`, `address_line_1`, `address_line_2`, `user_id`, `city_id`, `adreess_type_id`)
+INSERT INTO `address` (`address_id`, `address_line_1`, `address_line_2`, `user_id`,office_id`,`city_id`, `adreess_type_id`)
 VALUES 
-(1, 'Calle Principal 123', 'Piso 2, Puerta B', 1, 1, 1),
-(2, 'Avenida Secundaria 456', NULL, 2, 2, 2);
+(1, 'Calle Principal 123', 'Piso 2, Puerta B', 1, 1, 1, 1),
+(2, 'Avenida Secundaria 456', NULL, 2, 2, 2, 2);
 ```
 
 
