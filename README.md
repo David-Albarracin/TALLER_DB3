@@ -10,12 +10,11 @@
 
 ```sql
 -- CREAR BASE DE DATOS
-
 CREATE DATABASE garden;
-USE garden;
 ```
 
 ```sql
+USE garden;
 /*
 * Esta Tabla se Crea para Normalizar la Tabla Direccion
 * 
@@ -34,11 +33,11 @@ CREATE TABLE `address_type` (
 
 CREATE TABLE `country` (
   `country_id` int NOT NULL,
-  `country_prefix` varchar(45) NOT NULL,
+  `country_prefix` varchar(45) DEFAULT NULL,
   `country_name` varchar(45) NOT NULL,
   `flag_url` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`country_id`),
-  UNIQUE KEY `country_unique` (`country_prefix`)
+  PRIMARY KEY (`country_id`)
+  -- UNIQUE KEY `country_unique` (`country_prefix`)
 )ENGINE=InnoDB;
 
 
@@ -73,7 +72,7 @@ CREATE TABLE `legal_type` (
 */
 
 CREATE TABLE `measurement` (
-  `measurement_id` int NOT NULL,
+  `measurement_id` int NOT NULL AUTO_INCREMENT,
   `height` varchar(45) DEFAULT NULL,
   `width` varchar(45) DEFAULT NULL,
   `Length` varchar(45) DEFAULT NULL,
@@ -134,7 +133,7 @@ CREATE TABLE `order_status` (
 */
 
 CREATE TABLE `product` (
-  `product_id` int NOT NULL,
+  `product_id` VARCHAR(20) NOT NULL,
   `product_name` varchar(70) DEFAULT NULL,
   `description` text,
   `stock_amount` smallint DEFAULT NULL,
@@ -248,7 +247,7 @@ CREATE TABLE `order` (
 */
 
 CREATE TABLE `order_detail` (
-  `product_id` int NOT NULL,
+  `product_id` VARCHAR(20) NOT NULL,
   `order_id` int NOT NULL,
   `amount` varchar(45) DEFAULT NULL,
   `unit_price` varchar(45) DEFAULT NULL,
@@ -283,7 +282,7 @@ CREATE TABLE `pay` (
 */
 
 CREATE TABLE `phone_number` (
-  `phone_number_id` int NOT NULL,
+  `phone_number_id` int NOT NULL AUTO_INCREMENT,
   `phone_number` varchar(45) NOT NULL,
   `phone_prefix` varchar(45) DEFAULT NULL,
   `description` varchar(45) DEFAULT NULL,
@@ -292,8 +291,8 @@ CREATE TABLE `phone_number` (
   `phone_extension` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`phone_number_id`),
   KEY `fk_phone_number_user1_idx` (`user_id`),
-  KEY `fk_phone_number_office1_idx` (`office_id`),
-  KEY `phone_number_country_FK` (`phone_prefix`)
+  KEY `fk_phone_number_office1_idx` (`office_id`)
+  -- KEY `phone_number_country_FK` (`phone_prefix`)
 )ENGINE=InnoDB;
 
 
@@ -304,7 +303,7 @@ CREATE TABLE `phone_number` (
 */
 
 CREATE TABLE `users` (
-  `user_id` int NOT NULL,
+  `user_id` int NOT NULL AUTO_INCREMENT,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `usermeta_id` int DEFAULT NULL,
@@ -348,9 +347,10 @@ ADD CONSTRAINT `fk_pay_pay_method1` FOREIGN KEY (`pay_method_id`) REFERENCES `pa
 -- Constraints para la tabla `phone_number`
 ALTER TABLE `phone_number`
 ADD CONSTRAINT `fk_phone_number_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
-ADD CONSTRAINT `fk_phone_number_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-ADD CONSTRAINT `phone_number_country_FK` FOREIGN KEY (`phone_prefix`) REFERENCES `country` (`country_prefix`);
-
+ADD CONSTRAINT `fk_phone_number_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+/*
+ADD CONSTRAINT `phone_number_country_FK` FOREIGN KEY (`phone_prefix`) REFERENCES `country` (`country_prefix`)
+*/
 -- Constraints para la tabla `user`
 ALTER TABLE `users`
 ADD CONSTRAINT `fk_user_user_meta1` FOREIGN KEY (`usermeta_id`) REFERENCES `user_meta` (`usermeta_id`),
@@ -371,197 +371,183 @@ ALTER TABLE `city` ADD CONSTRAINT city_region_FK FOREIGN KEY (region_id) REFEREN
 
 -- Constraints para la tabla `region`
 ALTER TABLE `region` ADD CONSTRAINT region_country_FK FOREIGN KEY (country_id) REFERENCES country(country_id);
-
 ```
 
 
 
 ## INSERTAR DATOS DE PRUEBA
 
+Datos Extraídos de [DATOS GARDEN DATA BASE](https://gist.github.com/josejuansanchez/c408725e848afd64dd9a20ab37fba8c9);
+
+Datos Formateados 
+
+#### PROCEDIMIENTO PARA AGREGAR PRODUCTOS 
+
 ```sql
--- Insertando datos en la tabla `address_type`
-INSERT INTO `address_type` (`address_type_id`, `address_type`)
-VALUES 
-(1, 'Envío'),
-(2, 'Facturación'),
-(3, 'Otro'),
-(4, 'Trabajo');
+USE garden;
 
+DROP PROCEDURE IF EXISTS add_producto;
 
--- Insertando datos de prueba en la tabla `country`
--- Insertando datos en la tabla `country`
-INSERT INTO `country` (`country_id`, `country_prefix`, `country_name`, `flag_url`)
-VALUES 
-(1, '+34', 'Spain', 'https://example.com/flag_spain.png'),
-(2, '+57', 'Colombia', 'https://example.com/flag_colombia.png'),
-(3, '+1', 'United States', 'https://example.com/flag_usa.png'),
-(4, '+44', 'United Kingdom', 'https://example.com/flag_uk.png'),
-(5, '+49', 'Germany', 'https://example.com/flag_germany.png');
+DELIMITER $$
 
--- Insertando datos de prueba en la tabla `gama_product`
-INSERT INTO `gama_product` (`gama_product_id`, `description_text`, `description_html`, `imagen_url`)
-VALUES 
-('Herbaceas', 'Plantas para jardín decorativas', NULL, NULL),
-('Herramientas', 'Herramientas para todo tipo de acción', NULL, NULL),
-('Aromáticas', 'Plantas aromáticas', NULL, NULL),
-('Frutales', 'Árboles pequeños de producción frutal', NULL, NULL),
-('Ornamentales', 'Plantas vistosas para la decoración del jardín', NULL, NULL);
+CREATE PROCEDURE add_producto(
+    IN codigo_producto VARCHAR(15),
+    IN nombre VARCHAR(70),
+    IN gama VARCHAR(50),
+    IN dimensiones VARCHAR(25),
+    IN proveedor VARCHAR(50),
+    IN descripcion TEXT,
+    IN cantidad_en_stock SMALLINT,
+    IN precio_venta DECIMAL(15,2),
+    IN precio_proveedor DECIMAL(15,2)
+)
+BEGIN
+    DECLARE get_gama_product_id VARCHAR(50);
+	DECLARE get_measurement_id INT;
+    -- Verificar si la gama existe en la tabla gama_product
+    SELECT gama_product_id INTO get_gama_product_id FROM gama_product WHERE gama_product_id = gama;
 
+    -- Verificar si la gama existe
+    IF get_gama_product_id IS NULL THEN
+        INSERT INTO gama_product(
+        	gama_product_id,
+        	description_text,
+        	description_html,
+        	imagen_url
+        ) VALUES (
+        	gama,
+        	NULL,
+        	NULL,
+        	NULL
+        );
+    END IF;
 
--- Insertando datos de prueba en la tabla `legal_type`
-INSERT INTO `legal_type` (`legal_type_id`, `type`)
-VALUES 
-(1, 'CC'),
-(2, 'NIT'),
-(3, 'TI');
+    -- Obtener el measurement_id correspondiente para las dimensiones proporcionadas
+    INSERT INTO measurement(
+   		height,
+   		width,
+   		`Length`,
+   		weight
+    )VALUES(
+   		ROUND(RAND() * 100, 2),
+   		ROUND(RAND() * 100, 2),
+   		ROUND(RAND() * 100, 2),
+   		ROUND(RAND() * 100, 2)
+    );
+	SET get_measurement_id = LAST_INSERT_ID();
+    -- Realizar la inserción del producto
+    INSERT INTO product(
+        product_id,
+        product_name,
+        description,
+        stock_amount,
+        price,
+        price_provider,
+        measurement_id,
+        gama_product_id 
+    ) VALUES (
+        codigo_producto,
+        nombre,
+        descripcion,
+        cantidad_en_stock,
+        precio_venta,
+        precio_proveedor,
+        get_measurement_id,
+        get_gama_product_id
+    );
 
--- Insertando datos de prueba en la tabla `measurement`
-INSERT INTO `measurement` (`measurement_id`, `height`, `width`, `Length`, `weight`)
-VALUES 
-(1, '10 cm', '5 cm', '20 cm', '500 g'),
-(2, '15 cm', '8 cm', '25 cm', '750 g');
+END $$
 
--- Insertando datos de prueba en la tabla `order_type`
-INSERT INTO `order_type` (`order_type_id`, `type_name`)
-VALUES 
-(1, 'Compra'),
-(2, 'Venta');
+DELIMITER ;
 
--- Insertando datos de prueba en la tabla `pay_method`
-INSERT INTO `pay_method` (`pay_method_id`, `method`)
-VALUES 
-(1, 'Efectivo'),
-(2, 'Tarjeta de crédito'),
-(3, 'Transferencia bancaria'),
-(4, 'PayPal');
+```
 
--- Insertando datos de prueba en la tabla `rol`
-INSERT INTO `rol` (`rol_id`, `rol_name`)
-VALUES 
-(1, 'Empleado'),
-(2, 'Cliente'),
-(3, 'Proveedor'),
-(4, 'Jefe');
+#### PROCEDIMIENTO PARA AGREGAR OFICINAS
 
--- Insertando datos de prueba en la tabla `order_status`
-INSERT INTO `order_status` (`order_status_id`, `order_status_name`)
-VALUES 
-(1, 'Pendiente'),
-(2, 'En proceso'),
-(3, 'Rechazado'),
-(4, 'Entregado');
+```sql
+USE garden;
 
--- Insertando datos de prueba en la tabla `region`
-INSERT INTO `region` (`region_id`, `region_name`, `country_id`)
-VALUES 
-(1, 'Madrid', 1),
-(2, 'Barcelona', 1);
+DROP PROCEDURE IF EXISTS add_oficina;
 
--- Insertando datos de prueba en la tabla `city`
-INSERT INTO `city` (`city_id`, `city_name`, `postal_code`, `region_id`)
-VALUES 
-(1, 'Madrid', '28001', 1),
-(2, 'Barcelona', '08001', 2),
-(3, 'Fuenlabrada', '080201', 1);
+DELIMITER $$
 
--- Insertando datos de prueba en la tabla `user_meta`
-INSERT INTO `user_meta` (`usermeta_id`, `first_name`, `last_names`, `first_surname`, `last_surname`, `email`, `legal_id`, `legal_type_id`)
-VALUES 
-(1, 'Juan', 'García Pérez', 'García', 'Pérez', 'juan@example.com', '123456789', 1),
-(2, 'María', 'López García', 'López', 'García', 'maria@example.com', '987654321', 2),
-(3, 'David', 'Jose', 'Castellanos', 'Torres', 'pepe@example.com', '1231551515', 1),
-(7, 'Pepe', 'carlos', 'López', 'García', 'pepe@example.com', '98765432131', 1);
+CREATE PROCEDURE add_oficina(
+	IN codigo_oficina VARCHAR(10),
+    IN ciudad VARCHAR(30),
+    IN pais VARCHAR(50),
+    IN region_nombre VARCHAR(50),
+    IN codigo_postal VARCHAR(10),
+    IN telefono VARCHAR(20),
+    IN linea_direccion1 VARCHAR(50),
+    IN linea_direccion2 VARCHAR(50)
+)
+BEGIN
+	DECLARE get_city_id INT;
+	DECLARE get_region_id INT;
+	DECLARE get_country_id INT;
 
--- Insertando datos de prueba en la tabla `product`
-INSERT INTO `product` (`product_id`, `product_name`, `description`, `stock_amount`, `price`, `price_provider`, `measurement_id`, `gama_product_id`)
-VALUES 
-(1, 'Rosa roja', 'Descripción de la rosa roja', 100, 10, 8, 1, 'Herbaceas'),
-(2, 'Tulipán blanco', 'Descripción del tulipán blanco', 50, 8, 6, 2, 'Herramientas'),
-(3, 'Margarita amarilla', 'Descripción de la margarita amarilla', 80, 12, 10, 1, 'Ornamentales'),
-(4, 'Pala grande', 'Descripción de la pala grande', 30, 15, 14, 2, 'Herramientas'),
-(5, 'Azada de metal', 'Descripción de la azada de metal', 40, 18, 16, 2, 'Herramientas'),
-(6, 'Tomate', 'Descripción del tomate', 120, 2, 1, 1, 'Frutales'),
-(7, 'Cebolla', 'Descripción de la cebolla', 90, 1, 1, 1, 'Herbaceas'),
-(8, 'Clavel rojo', 'Descripción del clavel rojo', 70, 5, 4, 1, 'Ornamentales'),
-(9, 'Llave inglesa', 'Descripción de la llave inglesa', 25, 20, 18, 2, 'Herramientas'),
-(10, 'Semillas de lechuga', 'Descripción de las semillas de lechuga', 150, 3, 2, 1, 'Herbaceas'),
-(11, 'Mango', 'Descripción del mango', 80, 4, 2, 1, 'Frutales'),
-(12, 'Pimiento rojo', 'Descripción del pimiento rojo', 100, 3, 2, 1, 'Frutales'),
-(13, 'Martillo', 'Descripción del martillo', 35, 25, 22, 2, 'Herramientas'),
-(14, 'Tijeras de podar', 'Descripción de las tijeras de podar', 60, 12, 10, 2, 'Herramientas'),
-(15, 'Fresas', 'Descripción de las fresas', 110, 6, 4, 1, 'Frutales'),
-(16, 'Cactus', 'Descripción del cactus', 200, 8, 6, 1, 'Ornamentales'),
-(17, 'Perro de plástico para jardín', 'Descripción del perro de plástico para jardín', 20, 30, 28, 1, 'Ornamentales'),
-(18, 'Escoba de jardín', 'Descripción de la escoba de jardín', 45, 10, 8, 2, 'Herramientas'),
-(19, 'Cinta métrica', 'Descripción de la cinta métrica', 55, 8, 6, 2, 'Herramientas'),
-(20, 'Planta de lavanda', 'Descripción de la planta de lavanda', 85, 7, 5, 1, 'Aromáticas');
+	SELECT city_id INTO get_city_id FROM city WHERE city_name = ciudad;
 
--- Insertando datos de prueba en la tabla `office`
-INSERT INTO `office` (`office_id`, `office_name`)
-VALUES 
-(1, 'Oficina Central'),
-(2, 'Oficina de Ventas');
+    IF get_city_id IS NULL THEN
+        -- Insertar el país si no existe
+        SELECT country_id INTO get_country_id FROM country WHERE country_name = pais;
+        IF get_country_id IS NULL THEN
+            INSERT INTO country (country_prefix, country_name, flag_url) VALUES (NULL, pais, NULL);
+            SET get_country_id = LAST_INSERT_ID();
+        END IF;
 
--- Insertando datos de prueba en la tabla `user`
-INSERT INTO `users` (`user_id`, `created_at`, `updated_at`, `usermeta_id`, `office_id`, `rol_id`, `employee_id`, `boss_id`, `loan_limit`)
-VALUES 
+        -- Insertar la región si no existe
+        SELECT region_id INTO get_region_id FROM region WHERE region.region_name = region_nombre;
+        IF get_region_id IS NULL THEN
+            INSERT INTO region (region_name, country_id) VALUES (region_nombre, get_country_id);
+            SET get_region_id = LAST_INSERT_ID();
+        END IF;
 
-(1, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 2, 1, NULL, 7, 1000),
-(2, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 2, 2, 2, NULL, NULL, NULL),
-(11, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 2, 1, NULL, NULL, 1000),
-(3, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 3, 2, 2, 1, NULL, 1200),
-(4, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 2, 2, 11, NULL, 1000),
-(7, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 7, 2, 4, NULL, NULL, NULL),
-(12, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 2, 1, NULL, 7, 1000),
-(30, '2024-04-19 12:00:00', '2024-04-19 12:00:00', 1, 2, 1, NULL, NULL, 1000);
+        -- Insertar la ciudad
+        INSERT INTO city (city_name, postal_code, region_id) VALUES (ciudad, codigo_postal, get_region_id);
+        SET get_city_id = LAST_INSERT_ID();
+    END IF;
+   
+    INSERT INTO office(
+   		office_name
+   	) VALUES (
+   		codigo_oficina
+   	);
+   	
+   
+   	INSERT INTO phone_number(
+   		phone_number,
+   		phone_prefix,
+   		description,
+   		user_id,
+   		office_id,
+   		phone_extension
+   	) VALUES (
+   		telefono,
+   		NULL,
+   		NULL,
+   		NULL,
+   		codigo_oficina,
+   		NULL
+   	);
+	
+   	INSERT INTO address(
+   		address_line_1,
+   		address_line_2,
+   		user_id,city_id,
+   		office_id,
+   		adreess_type_id
+   	) VALUES (
+   		linea_direccion1,
+   		linea_direccion1,
+   		NULL,
+   		codigo_oficina,
+   		NULL
+   	);
 
--- Insertando datos de prueba en la tabla `order`
-INSERT INTO `order` (`order_id`, `user_id`, `order_date`, `waiting_date`, `deliver_date`, `comments`, `status_id`, `order_type_id`)
-VALUES 
-(1, 1, '2008-11-10', '2008-11-15', '2008-11-14', 'Pedido de prueba', 3, 1),
-(2, 1, '2008-12-10', '2008-12-15', '2008-12-14', 'Otro pedido de prueba', 3, 1),
-(3, 3, '2009-01-16', '2009-01-21', '2009-01-20', 'Pedido de prueba', 3, 1),
-(4, 3, '2009-02-16', '2009-02-21', '2009-02-20', 'Otro pedido de prueba', 4, 1),
-(5, 3, '2009-02-19', '2009-02-24', '2009-02-23', 'Pedido de prueba', 4, 1),
-(6, 2, '2007-01-08', '2007-01-13', '2007-01-12', 'Otro pedido de prueba', 1, 1),
-(7, 2, '2007-01-08', '2007-01-13', '2007-01-12', 'Pedido de prueba', 1, 1),
-(8, 2, '2007-01-08', '2007-01-13', '2007-01-12', 'Otro pedido de prueba', 1, 1),
-(9, 2, '2007-01-08', '2007-01-13', '2007-01-12', 'Pedido de prueba', 1, 1),
-(10, 3, '2007-01-08', '2007-01-13', '2007-01-12', 'Otro pedido de prueba', 1, 1),
-(11, 3, '2006-01-18', '2006-01-23', '2006-01-22', 'Pedido de prueba', 2, 1),
-(12, 7, '2009-01-13', '2009-01-18', '2009-01-13', 'Otro pedido de prueba', 2, 1),
-(13, 7, '2009-01-06', '2009-01-11', '2009-01-23', 'Pedido de prueba', 2, 1);
+END $$
 
-
--- Insertando datos de prueba en la tabla `order_detail`
-INSERT INTO `order_detail` (`product_id`, `order_id`, `amount`, `unit_price`, `line_number`)
-VALUES 
-(1, 1, '1', '10', 1),
-(2, 2, '2', '8', 1);
-
--- Insertando datos de prueba en la tabla `pay`
-INSERT INTO `pay` (`id_transaction`, `pay_date`, `total`, `user_id`, `pay_method_id`)
-VALUES 
-('TXN001', '2024-04-19 12:00:00', 10, 1, 1),
-('TXN002', '2008-04-19 12:00:00', 10, 1, 4),
-('TXN003', '2008-04-19 12:00:00', 10, 2, 4),
-('TXN004', '2009-04-18 12:00:00', 16, 2, 4);
-
--- Insertando datos de prueba en la tabla `phone_number`
-INSERT INTO `phone_number` (`phone_number_id`, `phone_number`, `phone_prefix`, `description`, `user_id`, `office_id`, `phone_extension`)
-VALUES 
-(1, '123456789', '+34', 'Personal', 1, NULL, NULL),
-(2, '987654321', '+34', 'Trabajo', 2, 2, NULL);
-
--- Insertando datos de prueba en la tabla `address`
-INSERT INTO `address` (`address_id`, `address_line_1`, `address_line_2`, `user_id`, `office_id`, `city_id`, `adreess_type_id`)
-VALUES 
-(1, 'Calle Principal 123', 'Piso 2, Puerta B', 1, 1, 1, 1),
-(2, 'Avenida Secundaria 456', NULL, 2, 2, 2, 2),
-(3, 'Avenida Secundaria 456', NULL, 3, 2, 2, 2),
-(4, 'Avenida Secundaria 456', NULL, 7, 2, 2, 2);
-
-
+DELIMITER ;
 ```
 
 
