@@ -20,7 +20,7 @@ USE garden;
 * 
 */
 CREATE TABLE `address_type` (
-  `address_type_id` int NOT NULL,
+  `address_type_id` int NOT NULL AUTO_INCREMENT,
   `address_type` varchar(45) NOT NULL,
   PRIMARY KEY (`address_type_id`)
 )ENGINE=InnoDB;
@@ -32,7 +32,7 @@ CREATE TABLE `address_type` (
 */
 
 CREATE TABLE `country` (
-  `country_id` int NOT NULL,
+  `country_id` int NOT NULL AUTO_INCREMENT,
   `country_prefix` varchar(45) DEFAULT NULL,
   `country_name` varchar(45) NOT NULL,
   `flag_url` varchar(45) DEFAULT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE `gama_product` (
 */
 
 CREATE TABLE `legal_type` (
-  `legal_type_id` int NOT NULL,
+  `legal_type_id` int NOT NULL AUTO_INCREMENT,
   `type` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`legal_type_id`)
 )ENGINE=InnoDB;
@@ -87,7 +87,7 @@ CREATE TABLE `measurement` (
 * Se Normaliza el tipo de orden para saver si es compra o venta
 */
 CREATE TABLE `order_type` (
-  `order_type_id` int NOT NULL,
+  `order_type_id` int NOT NULL AUTO_INCREMENT,
   `type_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`order_type_id`)
 )ENGINE=InnoDB;
@@ -99,7 +99,7 @@ CREATE TABLE `order_type` (
 * Se Normaliza el tipo de metodo de pago
 */
 CREATE TABLE `pay_method` (
-  `pay_method_id` int NOT NULL,
+  `pay_method_id` int NOT NULL AUTO_INCREMENT,
   `method` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`pay_method_id`)
 )ENGINE=InnoDB;
@@ -110,7 +110,7 @@ CREATE TABLE `pay_method` (
 * Se Crea para normalizar la tabla cliente - proveedor -empleado
 */
 CREATE TABLE `rol` (
-  `rol_id` int NOT NULL,
+  `rol_id` int NOT NULL AUTO_INCREMENT,
   `rol_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`rol_id`)
 )ENGINE=InnoDB;
@@ -121,7 +121,7 @@ CREATE TABLE `rol` (
 * Se Normaliza el campo estado del producto
 */
 CREATE TABLE `order_status` (
-  `order_status_id` int NOT NULL,
+  `order_status_id` int NOT NULL AUTO_INCREMENT,
   `order_status_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`order_status_id`)
 )ENGINE=InnoDB;
@@ -150,7 +150,7 @@ CREATE TABLE `product` (
 -- REGION
 
 CREATE TABLE `region` (
-  `region_id` int NOT NULL,
+  `region_id` int NOT NULL AUTO_INCREMENT,
   `region_name` varchar(45) DEFAULT NULL,
   `country_id` int NOT NULL,
   PRIMARY KEY (`region_id`),
@@ -161,7 +161,7 @@ CREATE TABLE `region` (
 -- INFORMACION DEL USUARIO
 
 CREATE TABLE `user_meta` (
-  `usermeta_id` int NOT NULL,
+  `usermeta_id` int NOT NULL AUTO_INCREMENT,
   `first_name` varchar(45) DEFAULT NULL,
   `last_names` varchar(250) DEFAULT NULL,
   `first_surname` varchar(45) DEFAULT NULL,
@@ -177,7 +177,7 @@ CREATE TABLE `user_meta` (
 -- CIUDAD
 
 CREATE TABLE `city` (
-  `city_id` int NOT NULL,
+  `city_id` int NOT NULL AUTO_INCREMENT,
   `city_name` varchar(45) DEFAULT NULL,
   `postal_code` varchar(45) DEFAULT NULL,
   `region_id` int NOT NULL,
@@ -193,17 +193,17 @@ CREATE TABLE `city` (
 */
 
 CREATE TABLE `address` (
-  `address_id` int NOT NULL,
+  `address_id` int NOT NULL AUTO_INCREMENT,
   `address_line_1` varchar(45) DEFAULT NULL,
   `address_line_2` varchar(45) DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `city_id` int DEFAULT NULL,
   `office_id` int NULL,
-  `adreess_type_id` int NOT NULL,
+  `address_type_id` int NOT NULL,
   PRIMARY KEY (`address_id`),
-  KEY `fk_adreess_user1_idx` (`user_id`),
-  KEY `fk_adreess_city1_idx` (`city_id`),
-  KEY `fk_adreess_adreess_type1_idx` (`adreess_type_id`)
+  KEY `fk_address_user1_idx` (`user_id`),
+  KEY `fk_address_city1_idx` (`city_id`),
+  KEY `fk_address_type_id1_idx` (`address_type_id`)
 )ENGINE=InnoDB;
 
 
@@ -213,7 +213,7 @@ CREATE TABLE `address` (
 * los datos de telefono
 */
 CREATE TABLE `office` (
-  `office_id` int NOT NULL,
+  `office_id` int NOT NULL AUTO_INCREMENT,
   `office_name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`office_id`)
 )ENGINE=InnoDB;
@@ -226,7 +226,7 @@ CREATE TABLE `office` (
 */
 
 CREATE TABLE `order` (
-  `order_id` int NOT NULL,
+  `order_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `order_date` date DEFAULT NULL,
   `waiting_date` date DEFAULT NULL,
@@ -253,7 +253,8 @@ CREATE TABLE `order_detail` (
   `unit_price` varchar(45) DEFAULT NULL,
   `line_number` smallint DEFAULT NULL,
   KEY `fk_detail_order_product1_idx` (`product_id`),
-  KEY `fk_detail_order_order1_idx` (`order_id`)
+  KEY `fk_detail_order_order1_idx` (`order_id`),
+  CONSTRAINT pk_oder_detail PRIMARY KEY (product_id, order_id)
 )ENGINE=InnoDB;
 
 
@@ -325,7 +326,7 @@ ALTER TABLE `address`
 ADD CONSTRAINT `fk_adreess_user1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
 ADD CONSTRAINT `fk_adreess_office1` FOREIGN KEY (`office_id`) REFERENCES `office` (`office_id`),
 ADD CONSTRAINT `fk_adreess_city1` FOREIGN KEY (`city_id`) REFERENCES `city` (`city_id`),
-ADD CONSTRAINT `fk_adreess_adreess_type1` FOREIGN KEY (`adreess_type_id`) REFERENCES `address_type` (`address_type_id`);
+ADD CONSTRAINT `fk_address_type_id_type1` FOREIGN KEY (`address_type_id`) REFERENCES `address_type` (`address_type_id`);
 
 
 -- Constraints para la tabla `order`
@@ -379,7 +380,61 @@ ALTER TABLE `region` ADD CONSTRAINT region_country_FK FOREIGN KEY (country_id) R
 
 Datos Extraídos de [DATOS GARDEN DATA BASE](https://gist.github.com/josejuansanchez/c408725e848afd64dd9a20ab37fba8c9);
 
-Datos Formateados 
+Datos Formateados [DATOS FORMATEADOS](https://github.com/David-Albarracin/TALLER_DB3/blob/main/data_format.txt)
+
+#### FUNCIÓN PARA GUARDAR CIUDADES
+
+```sql
+USE garden;
+
+DROP FUNCTION IF EXISTS def_get_city_id;
+
+DELIMITER $$
+
+CREATE FUNCTION def_get_city_id(
+	city_name VARCHAR(50),
+	country_name VARCHAR(50),
+	region_name VARCHAR(50),
+	postal_code VARCHAR(50)
+)
+RETURNS INT
+	DETERMINISTIC
+BEGIN
+	DECLARE get_city_id INT;
+	DECLARE get_region_id INT;
+	DECLARE get_country_id INT;
+	
+	SELECT city_id INTO get_city_id FROM city AS c WHERE c.city_name = city_name;
+
+	IF get_city_id IS NULL THEN
+
+        SELECT country_id INTO get_country_id FROM country AS co WHERE co.country_name = country_name;
+       
+        IF get_country_id IS NULL THEN
+            INSERT INTO country (country_prefix, country_name, flag_url) VALUES (NULL, country_name, NULL);
+            SET get_country_id = LAST_INSERT_ID();
+        END IF;
+
+        -- Insertar la región si no existe
+        SELECT region_id INTO get_region_id FROM region WHERE region.region_name = region_name;
+       
+        IF get_region_id IS NULL THEN
+            INSERT INTO region (region_name, country_id) VALUES (region_name, get_country_id);
+            SET get_region_id = LAST_INSERT_ID();
+        END IF;
+
+        -- Insertar la ciudad
+        INSERT INTO city (city_name, postal_code, region_id) VALUES (city_name, postal_code, get_region_id);
+        SET get_city_id = LAST_INSERT_ID();
+    END IF;
+   	RETURN get_city_id;
+   
+END $$
+
+DELIMITER ;
+```
+
+
 
 #### PROCEDIMIENTO PARA AGREGAR PRODUCTOS 
 
@@ -483,37 +538,19 @@ CREATE PROCEDURE add_oficina(
 )
 BEGIN
 	DECLARE get_city_id INT;
-	DECLARE get_region_id INT;
-	DECLARE get_country_id INT;
-
-	SELECT city_id INTO get_city_id FROM city WHERE city_name = ciudad;
-
-    IF get_city_id IS NULL THEN
-        -- Insertar el país si no existe
-        SELECT country_id INTO get_country_id FROM country WHERE country_name = pais;
-        IF get_country_id IS NULL THEN
-            INSERT INTO country (country_prefix, country_name, flag_url) VALUES (NULL, pais, NULL);
-            SET get_country_id = LAST_INSERT_ID();
-        END IF;
-
-        -- Insertar la región si no existe
-        SELECT region_id INTO get_region_id FROM region WHERE region.region_name = region_nombre;
-        IF get_region_id IS NULL THEN
-            INSERT INTO region (region_name, country_id) VALUES (region_nombre, get_country_id);
-            SET get_region_id = LAST_INSERT_ID();
-        END IF;
-
-        -- Insertar la ciudad
-        INSERT INTO city (city_name, postal_code, region_id) VALUES (ciudad, codigo_postal, get_region_id);
-        SET get_city_id = LAST_INSERT_ID();
-    END IF;
-   
+	DECLARE get_office_id INT;
+	DECLARE get_address_type_id INT;
+	
+	SET get_city_id = (SELECT def_get_city_id(ciudad, pais, region_nombre, codigo_postal));
+	
     INSERT INTO office(
    		office_name
    	) VALUES (
    		codigo_oficina
    	);
-   	
+   
+   
+   	SET get_office_id = LAST_INSERT_ID();
    
    	INSERT INTO phone_number(
    		phone_number,
@@ -527,23 +564,248 @@ BEGIN
    		NULL,
    		NULL,
    		NULL,
-   		codigo_oficina,
+   		get_office_id,
    		NULL
    	);
-	
+   
+   	SELECT address_type_id INTO get_address_type_id FROM address_type AS ast WHERE ast.address_type  = 'Oficina'; 
+	IF get_address_type_id IS NULL THEN
+		INSERT INTO address_type(
+			address_type
+		) VALUES (
+			'Oficina'
+		);
+		SET get_address_type_id = LAST_INSERT_ID(); 
+	END IF;
+   	
    	INSERT INTO address(
    		address_line_1,
    		address_line_2,
-   		user_id,city_id,
+   		user_id,
+   		city_id,
    		office_id,
-   		adreess_type_id
+   		address_type_id
    	) VALUES (
    		linea_direccion1,
    		linea_direccion1,
    		NULL,
-   		codigo_oficina,
-   		NULL
+   		get_city_id,
+   		get_office_id,
+   		get_address_type_id
    	);
+
+END $$
+
+DELIMITER ;
+```
+
+#### PROCEDIMIENTO PARA AGREGAR EMPLEADOS
+
+```sql
+USE garden;
+
+DROP PROCEDURE IF EXISTS add_empleado;
+
+DELIMITER $$
+
+CREATE PROCEDURE add_empleado(
+	IN codigo_empleado INT,
+  	IN nombre VARCHAR(50),
+  	IN apellido1 VARCHAR(50),
+  	IN apellido2 VARCHAR(50),
+  	IN extension VARCHAR(10) ,
+  	IN email VARCHAR(100),
+  	IN codigo_oficina VARCHAR(10),
+  	IN codigo_jefe INT,
+  	IN puesto VARCHAR(50)
+)
+BEGIN
+	DECLARE get_user_id INT;
+	DECLARE get_usermeta_id INT;
+	DECLARE get_office_id INT;
+	DECLARE get_rol_id INT;
+	
+   
+	SELECT office_id INTO get_office_id FROM office AS o WHERE o.office_name = codigo_oficina;
+	SELECT rol_id INTO get_rol_id FROM rol AS r WHERE r.rol_name = puesto;
+
+	IF get_rol_id IS NULL THEN
+		INSERT INTO rol(
+			rol_name
+		) VALUES (
+			puesto
+		);
+		SET get_rol_id = LAST_INSERT_ID(); 
+	END IF;
+
+
+	INSERT INTO user_meta(
+		first_name,
+		last_names,
+		first_surname,
+		last_surname,
+		email,
+		legal_id,
+		legal_type_id
+	) VALUES (
+		nombre,
+		NULL,
+		apellido1,
+		apellido2,
+		email,
+		ROUND(RAND() * 1, 2),
+		1
+	);
+
+	SET get_usermeta_id = LAST_INSERT_ID(); 
+	   	
+	INSERT INTO users(
+		created_at,
+		updated_at,
+		usermeta_id,
+		office_id,
+		rol_id,
+		employee_id,
+		boss_id,
+		loan_limit
+	) VALUES (
+		NOW(),
+		NOW(),
+		get_usermeta_id,
+		get_office_id,
+		get_rol_id,
+		NULL,
+		codigo_jefe,
+		NULL
+	);
+
+	SET get_user_id = LAST_INSERT_ID(); 
+
+   	INSERT INTO phone_number(
+   		phone_number,
+   		phone_prefix,
+   		description,
+   		user_id,
+   		office_id,
+   		phone_extension
+   	) VALUES (
+   		extension,
+   		NULL,
+   		NULL,
+   		get_user_id,
+   		get_office_id,
+   		extension
+   	);
+
+
+END $$
+
+DELIMITER ;
+```
+
+#### PROCEDIMIENTO PARA AGREGAR CLIENTES
+
+```sql
+USE garden;
+
+DROP PROCEDURE IF EXISTS add_cliente;
+
+DELIMITER $$
+
+CREATE PROCEDURE add_cliente(
+	IN codigo_cliente INT,
+  	IN nombre_cliente VARCHAR(50),
+  	IN nombre_contacto VARCHAR(30),
+  	IN apellido_contacto VARCHAR(30),
+  	IN telefono VARCHAR(15),
+  	IN fax VARCHAR(15),
+  	IN linea_direccion1 VARCHAR(50),
+  	IN linea_direccion2 VARCHAR(50),
+  	IN ciudad VARCHAR(50),
+  	IN region VARCHAR(50),
+  	IN pais VARCHAR(50),
+  	IN codigo_postal VARCHAR(10),
+  	IN codigo_empleado_rep_ventas INT ,
+  	IN limite_credito DECIMAL(15,2),
+)
+BEGIN
+	DECLARE get_user_id INT;
+	DECLARE get_usermeta_id INT;
+	DECLARE get_office_id INT;
+	DECLARE get_rol_id INT;
+	
+   
+	SELECT office_id INTO get_office_id FROM office AS o WHERE o.office_name = codigo_oficina;
+	SELECT rol_id INTO get_rol_id FROM rol AS r WHERE r.rol_name = puesto;
+
+	IF get_rol_id IS NULL THEN
+		INSERT INTO rol(
+			rol_name
+		) VALUES (
+			puesto
+		);
+		SET get_rol_id = LAST_INSERT_ID(); 
+	END IF;
+
+
+	INSERT INTO user_meta(
+		first_name,
+		last_names,
+		first_surname,
+		last_surname,
+		email,
+		legal_id,
+		legal_type_id
+	) VALUES (
+		nombre,
+		NULL,
+		apellido1,
+		apellido2,
+		email,
+		ROUND(RAND() * 1, 2),
+		1
+	);
+
+	SET get_usermeta_id = LAST_INSERT_ID(); 
+	   	
+	INSERT INTO users(
+		created_at,
+		updated_at,
+		usermeta_id,
+		office_id,
+		rol_id,
+		employee_id,
+		boss_id,
+		loan_limit
+	) VALUES (
+		NOW(),
+		NOW(),
+		get_usermeta_id,
+		get_office_id,
+		get_rol_id,
+		NULL,
+		codigo_jefe,
+		NULL
+	);
+
+	SET get_user_id = LAST_INSERT_ID(); 
+
+   	INSERT INTO phone_number(
+   		phone_number,
+   		phone_prefix,
+   		description,
+   		user_id,
+   		office_id,
+   		phone_extension
+   	) VALUES (
+   		extension,
+   		NULL,
+   		NULL,
+   		get_user_id,
+   		get_office_id,
+   		extension
+   	);
+
 
 END $$
 
